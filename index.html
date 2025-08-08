@@ -1,72 +1,456 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <meta charset="UTF-8">
- <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Profile - Ashien Frazier</title>
+  <meta charset="UTF-8">
+  <title>Gw pokoknya gabut</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The most over-engineered personal profile on the internet.">
+  <meta name="theme-color" content="#6366f1">
 
- <!-- Google Fonts -->
- <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
- <link rel="stylesheet" href="style.css">
+  <!-- PWA -->
+  <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Ashien Frazier&quot;,&quot;short_name&quot;:&quot;Ashien&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://i.pravatar.cc/512&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}],&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111827&quot;,&quot;theme_color&quot;:&quot;#6366f1&quot;}">
+  <link rel="icon" href="https://i.pravatar.cc/64">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- 3rd-party libs -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+
+  <style>
+    :root {
+      --bg: #f8f9fb;
+      --bg2: #ffffff;
+      --text: #111827;
+      --accent: #6366f1;
+      --muted: #9ca3af;
+      --border: #e5e7eb;
+    }
+
+    [data-theme="dark"] {
+      --bg: #111827;
+      --bg2: #1f2937;
+      --text: #f9fafb;
+      --accent: #818cf8;
+      --border: #374151;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background .3s, color .3s;
+      overflow-x: hidden;
+    }
+
+    /* ---- Header 3D Canvas ---- */
+    #three-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 300px;
+      z-index: 0;
+    }
+
+    /* ---- Top bar ---- */
+    .top-bar {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      padding: 1rem 2rem;
+    }
+
+    .toggle-theme {
+      cursor: pointer;
+      font-size: 1.5rem;
+      z-index: 10;
+    }
+
+    .live-clock {
+      z-index: 10;
+      font-weight: 600;
+      font-size: 1rem;
+    }
+
+    /* ---- Avatar ---- */
+    .avatar-wrapper {
+      position: relative;
+      width: 150px;
+      height: 150px;
+      margin: -75px auto 0;
+      z-index: 2;
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 5px solid var(--bg2);
+      object-fit: cover;
+      transition: transform .3s;
+      cursor: pointer;
+    }
+
+    .avatar:hover { transform: scale(1.1); }
+
+    /* ---- Card ---- */
+    .card {
+      max-width: 600px;
+      margin: 80px auto 2rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.1);
+      padding: 2rem;
+      position: relative;
+    }
+
+    .username {
+      font-size: 2rem;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: .25rem;
+    }
+
+    .status {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 2rem;
+    }
+
+    /* ---- Sections ---- */
+    .section h3 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+      color: var(--accent);
+    }
+
+    .editable {
+      padding: .25rem .5rem;
+      border: 1px dashed transparent;
+      border-radius: 4px;
+      transition: border-color .3s;
+    }
+
+    .editable:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* ---- Progress bars ---- */
+    .skill {
+      margin-bottom: 1rem;
+    }
+
+    .skill label {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 600;
+      margin-bottom: .25rem;
+    }
+
+    .progress-bar {
+      height: 10px;
+      background: var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      width: 0%;
+      transition: width 1.2s ease-out;
+    }
+
+    /* ---- Social ---- */
+    .social-links {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .social-links img {
+      width: 32px;
+      height: 32px;
+      transition: transform .2s;
+    }
+
+    .social-links a:hover img { transform: scale(1.2); }
+
+    /* ---- QR ---- */
+    .qr-wrapper {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    #qr-canvas {
+      display: inline-block;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .5rem;
+    }
+
+    /* ---- Footer ---- */
+    .footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--muted);
+      font-size: .875rem;
+    }
+
+    /* ---- Sound toggle ---- */
+    .sound-toggle {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      cursor: pointer;
+      z-index: 20;
+    }
+
+    /* ---- Animations ---- */
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: none; }
+    }
+
+    .animate {
+      animation: fade-in .8s forwards;
+    }
+  </style>
 </head>
 <body>
 
- <div class="header">
-  <img src="./images/avatar.jpg" alt="Avatar" class="avatar">
-  <div class="username">Ashien Frazier 😎</div>
-  <div class="status">Gak tau siapa anjir</div>
- </div>
+<canvas id="three-canvas"></canvas>
 
- <div class="card">
-  <div class="section">
-   <h3>Info</h3>
-   <div class="info-item">📍 Jakarta, Indonesia</div>
-   <div class="info-item">📞 62882... (sisanya pake feeling)</div>
-   <div class="info-item">✉️ fadilla@exdonuts.com (email beneran)</div>
-   <div class="info-item">💬 Dimas profesional, anjay mabar certified™</div>
-   <div class="info-item">🗓 25 September 2018 (jaman masih pake BBM)</div>
+<header class="top-bar">
+  <div class="live-clock" id="clock">--:--:--</div>
+  <div class="toggle-theme" id="themeToggle" title="Toggle dark mode">🌓</div>
+</header>
+
+<main class="card">
+  <div class="avatar-wrapper">
+    <img class="avatar" id="avatar" src="https://i.pravatar.cc/300?u=thomas" alt="Ashien">
+    <input type="file" id="avatarUpload" accept="image/*" hidden>
   </div>
 
-  <div class="section skills">
-   <h3>Skill Supernatural</h3>
-   <div class="skill">
-    <span>🛏️ Tidur Level Dewa</span>
-    <div class="progress-bar"><div style="width:98%"></div></div>
-   </div>
-   <div class="skill">
-    <span>🍟 Jajan Random</span>
-    <div class="progress-bar"><div style="width:92%"></div></div>
-   </div>
-   <div class="skill">
-    <span>🍗 Makan Tanpa Henti</span>
-    <div class="progress-bar"><div style="width:88%"></div></div>
-   </div>
-   <div class="skill">
-    <span>🧘‍♂️ Nggak Ngapa-ngapain</span>
-    <div class="progress-bar"><div style="width:100%"></div></div>
-   </div>
-  </div>
+  <h1 class="username editable" contenteditable="true">Ashien Frazier</h1>
+  <p class="status editable" contenteditable="true">Gak tau siapa anjir, tapi keren sih</p>
 
-  <div class="section">
-   <h3>Pencapaian Heboh</h3>
-   <div class="info-item">🏆 Juara 1 Rebahan Marathon 2023</div>
-   <div class="info-item">📜 Sertifikat Profesional Tiduran di Gawean</div>
-   <div class="info-item">⭐ Dinobatkan sebagai "Si Paling Gak Peduli"</div>
-  </div>
+  <!-- Info -->
+  <section class="section">
+    <h3>Info</h3>
+    <p class="editable" contenteditable="true">📍 Jakarta, Indonesia</p>
+    <p class="editable" contenteditable="true">📞 62882... (sisanya pake feeling)</p>
+    <p class="editable" contenteditable="true">✉️ fadilla@exdonuts.com</p>
+    <p class="editable" contenteditable="true">💬 Dimas profesional, anjay mabar certified™</p>
+    <p class="editable" contenteditable="true">🗓 25 September 2018</p>
+  </section>
 
-  <div class="section">
-   <h3>Social Media (buat stalk boleh 👀)</h3>
-   <div class="social-links">
-    <a href="https://www.instagram.com/ayam_special1"><img src="./images/instagram.webp" alt="Instagram"></a>
-    <a href="https://github.com/BIANTCA"><img src="./images/github.webp" alt="GitHub"></a>
-    <a href="https://x.com/AshienFrazier"><img src="./images/twitter.webp" alt="Twitter"></a>
-   </div>
-  </div>
- </div>
+  <!-- Skills -->
+  <section class="section">
+    <h3>Skill Supernatural</h3>
+    <div class="skill">
+      <label><span>🛏️ Tidur Level Dewa</span> <span>98%</span></label>
+      <div class="progress-bar"><div class="progress-fill" data-val="98"></div></div>
+    </div>
+    <div class="skill">
+      <label><span>🍟 Jajan Random</span> <span>92%</span></label>
+      <div class="progress-bar"><div class="progress-fill" data-val="92"></div></div>
+    </div>
+    <div class="skill">
+      <label><span>🍗 Makan Tanpa Henti</span> <span>88%</span></label>
+      <div class="progress-bar"><div class="progress-fill" data-val="88"></div></div>
+    </div>
+    <div class="skill">
+      <label><span>🧘‍♂️ Nggak Ngapa-ngapain</span> <span>100%</span></label>
+      <div class="progress-bar"><div class="progress-fill" data-val="100"></div></div>
+    </div>
+  </section>
 
- <div class="footer">
-  🔔 Notifikasi: <strong>Selalu nyala, tapi dibaca nanti-nanti</strong>
- </div>
+  <!-- Achievements -->
+  <section class="section">
+    <h3>Pencapaian</h3>
+    <p>🏆 Juara 1 Rebahan Marathon 2023</p>
+    <p>📜 Sertifikat Profesional Tiduran di Gawean</p>
+    <p>⭐ Dinobatkan sebagai "Si Paling Gak Peduli"</p>
+  </section>
 
+  <!-- Social -->
+  <section class="section">
+    <h3>Social Media (buat stalk boleh 👀)</h3>
+    <div class="social-links">
+      <a href="https://www.instagram.com/ayam_special1" target="_blank"><img src="./images/instagram.webp" alt="IG"></a>
+      <a href="https://github.com/BIANTCA" target="_blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"></a>
+      <a href="https://x.com/AshienFrazier" target="_blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter"></a>
+    </div>
+  </section>
+
+  <!-- QR vCard -->
+  <section class="qr-wrapper">
+    <h3>QR vCard</h3>
+    <canvas id="qr-canvas"></canvas>
+  </section>
+</main>
+
+<footer class="footer">
+  🔔 Notifikasi: <strong>Selalu nyala, tapi dibaca nanti-nanti</strong><br>
+  © <span id="year">2025</span> Ashien Frazier
+</footer>
+
+<button class="sound-toggle" title="Toggle sounds" id="soundToggle">🔊</button>
+
+<script>
+/* ============ CONFIG ============ */
+const SOUNDS_ENABLED = !!localStorage.getItem('sounds');
+const TYPE_SND = new Audio('data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAEAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
+const POP_SND = new Audio('data:audio/wav;base64,UklGRiQDAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YQADAAAAAAEA');
+
+/* ============ THEME ============ */
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme(dark) {
+  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+  themeToggle.textContent = dark ? '🌞' : '🌙';
+}
+themeToggle.addEventListener('click', () => {
+  const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+  applyTheme(dark);
+  localStorage.setItem('dark', dark);
+});
+applyTheme(localStorage.getItem('dark') === 'true');
+
+/* ============ CLOCK ============ */
+const clock = document.getElementById('clock');
+function updateClock() {
+  const now = new Date();
+  clock.textContent = now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ============ SOUNDS ============ */
+const soundBtn = document.getElementById('soundToggle');
+function toggleSounds() {
+  const on = !SOUNDS_ENABLED;
+  localStorage.setItem('sounds', on ? '1' : '');
+  soundBtn.textContent = on ? '🔊' : '🔇';
+}
+soundBtn.textContent = SOUNDS_ENABLED ? '🔊' : '🔇';
+soundBtn.addEventListener('click', toggleSounds);
+
+document.addEventListener('keydown', e => {
+  if (SOUNDS_ENABLED && e.target.isContentEditable) TYPE_SND.cloneNode().play();
+});
+document.addEventListener('keyup', e => {
+  if (SOUNDS_ENABLED && e.key === 'Backspace' && e.target.isContentEditable) POP_SND.cloneNode().play();
+});
+
+/* ============ PROGRESS BARS ============ */
+function animateProgress() {
+  document.querySelectorAll('.progress-fill').forEach(el => {
+    const val = el.dataset.val;
+    setTimeout(() => el.style.width = val + '%', 300);
+  });
+}
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => e.isIntersecting && animateProgress());
+});
+io.observe(document.querySelector('.skills'));
+
+/* ============ AVATAR SWAP ============ */
+const avatar = document.getElementById('avatar');
+const fileInp = document.getElementById('avatarUpload');
+avatar.addEventListener('click', () => fileInp.click());
+fileInp.addEventListener('change', e => {
+  const file = e.target.files[0];
+  if (file) {
+    const url = URL.createObjectURL(file);
+    avatar.src = url;
+    localStorage.setItem('avatar', url);
+  }
+});
+if (localStorage.getItem('avatar')) avatar.src = localStorage.getItem('avatar');
+
+/* ============ CONFETTI ON ACHIEVEMENT HOVER ============ */
+document.querySelectorAll('.section p').forEach(p => {
+  p.addEventListener('mouseenter', () => {
+    if (SOUNDS_ENABLED && typeof confetti === 'function') {
+      confetti({ particleCount: 60, spread: 70, origin: { y: .8 } });
+    }
+  });
+});
+
+/* ============ QR CODE ============ */
+const vcard = `BEGIN:VCARD
+VERSION:3.0
+FN:Ashien Frazier
+EMAIL:fadilla@exdonuts.com
+TEL:62882
+ADR:;;Jakarta;Indonesia;;;
+URL:https://github.com/BIANTCA
+NOTE:Dimas profesional, anjay mabar certified™
+END:VCARD`;
+QRCode.toCanvas(document.getElementById('qr-canvas'), vcard.trim(), { width: 160 });
+
+/* ============ 3D PARTICLE HEADER ============ */
+let scene, camera, renderer, particles;
+function initThree() {
+  if (!window.THREE) return;
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(75, innerWidth / 300, .1, 1000);
+  camera.position.z = 5;
+
+  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
+  renderer.setSize(innerWidth, 300);
+
+  const geo = new THREE.BufferGeometry();
+  const count = 2000;
+  const pos = new Float32Array(count * 3);
+  for (let i = 0; i < count * 3; i++) pos[i] = (Math.random() - .5) * 10;
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+
+  const mat = new THREE.PointsMaterial({ color: 0x6366f1, size: .02 });
+  particles = new THREE.Points(geo, mat);
+  scene.add(particles);
+
+  animate();
+}
+function animate() {
+  requestAnimationFrame(animate);
+  particles.rotation.x += .0005;
+  particles.rotation.y += .0007;
+  renderer.render(scene, camera);
+}
+window.addEventListener('resize', () => {
+  if (renderer) {
+    camera.aspect = innerWidth / 300;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, 300);
+  }
+});
+window.addEventListener('load', initThree);
+
+/* ============ PWA SERVICE WORKER ============ */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('data:text/javascript,console.log("sw")');
+}
+
+/* ============ YEAR ============ */
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
 </body>
 </html>
