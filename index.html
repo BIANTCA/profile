@@ -1,456 +1,484 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Gw pokoknya gabut</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="The most over-engineered personal profile on the internet.">
-  <meta name="theme-color" content="#6366f1">
+ <meta charset="utf-8" />
+ <meta name="viewport" content="width=device-width,initial-scale=1" />
+ <title>Gw pokoknya gabut</title>
+ <meta name="description" content="The most over-engineered personal profile on the internet." />
+ <meta name="theme-color" content="#6366f1" />
 
-  <!-- PWA -->
-  <link rel="manifest" href="data:application/manifest+json,{&quot;name&quot;:&quot;Ashien Frazier&quot;,&quot;short_name&quot;:&quot;Ashien&quot;,&quot;icons&quot;:[{&quot;src&quot;:&quot;https://i.pravatar.cc/512&quot;,&quot;sizes&quot;:&quot;512x512&quot;,&quot;type&quot;:&quot;image/png&quot;}],&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111827&quot;,&quot;theme_color&quot;:&quot;#6366f1&quot;}">
-  <link rel="icon" href="https://i.pravatar.cc/64">
+ <!-- PWA manifest (inline minimal) -->
+ <link rel="manifest" href='data:application/manifest+json,{"name":"Ashien Frazier","short_name":"Ashien","icons":[{"src":"https://i.pravatar.cc/512","sizes":"512x512","type":"image/png"}],"start_url":".","display":"standalone","background_color":"#111827","theme_color":"#6366f1"}' />
 
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+ <!-- Google Font -->
+ <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
 
-  <!-- 3rd-party libs -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
+ <!-- libs -->
+ <script src="https://cdn.jsdelivr.net/npm/three@0.158.0/build/three.min.js" defer></script>
+ <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" defer></script>
+ <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js" defer></script>
 
-  <style>
-    :root {
-      --bg: #f8f9fb;
-      --bg2: #ffffff;
-      --text: #111827;
-      --accent: #6366f1;
-      --muted: #9ca3af;
-      --border: #e5e7eb;
-    }
+ <style>
+  :root{
+   --bg:#f8f9fb;
+   --bg2:#ffffff;
+   --text:#111827;
+   --accent:#6366f1;
+   --muted:#6b7280;
+   --glass:rgba(255,255,255,0.6);
+   --border:#e5e7eb;
+  }
+  [data-theme="dark"]{
+   --bg:#0b1020;
+   --bg2:rgba(31,41,55,0.6);
+   --text:#f8fafc;
+   --accent:#818cf8;
+   --muted:#9ca3af;
+   --glass:rgba(17,24,39,0.55);
+   --border:#374151;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+   font-family:'Poppins',sans-serif;
+   background:linear-gradient(180deg,var(--bg),#eef2ff 60%);
+   color:var(--text);
+   min-height:100vh;
+   -webkit-font-smoothing:antialiased;
+   -moz-osx-font-smoothing:grayscale;
+  }
 
-    [data-theme="dark"] {
-      --bg: #111827;
-      --bg2: #1f2937;
-      --text: #f9fafb;
-      --accent: #818cf8;
-      --border: #374151;
-    }
+  /* header canvas */
+  #three-canvas{position:fixed;top:0;left:0;width:100%;height:42vh;z-index:0;pointer-events:none;mix-blend-mode:screen;opacity:.9}
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* topbar */
+  .top-bar{
+   position:relative;z-index:20;padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;
+  }
+  .top-left{display:flex;gap:.75rem;align-items:center}
+  .brand{font-weight:700;font-size:1.05rem}
+  .live-clock{font-weight:600;color:var(--muted)}
+  .controls{display:flex;gap:.5rem;align-items:center}
 
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      transition: background .3s, color .3s;
-      overflow-x: hidden;
-    }
+  /* container card */
+  .container{max-width:920px;margin:6.5rem auto 3rem;padding:1rem}
+  .card{
+   background:linear-gradient(180deg,var(--glass),transparent);
+   backdrop-filter:blur(10px) saturate(1.05);
+   border:1px solid var(--border);
+   border-radius:18px;padding:1.25rem 1.25rem 2rem;box-shadow:0 12px 40px rgba(2,6,23,0.08);position:relative;overflow:visible;
+  }
 
-    /* ---- Header 3D Canvas ---- */
-    #three-canvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 300px;
-      z-index: 0;
-    }
+  /* avatar */
+  .avatar-row{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+  .avatar-wrapper{width:128px;height:128px;border-radius:50%;overflow:hidden;border:6px solid var(--bg2);box-shadow:0 8px 30px rgba(2,6,23,0.06);flex:0 0 128px;cursor:pointer;transition:transform .25s}
+  .avatar-wrapper:hover{transform:translateY(-6px)}
+  .avatar{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.02)}
+  .meta{flex:1;min-width:200px}
+  .username{font-size:1.5rem;font-weight:700;margin-bottom:.125rem}
+  .status{color:var(--muted);margin-bottom:.5rem}
 
-    /* ---- Top bar ---- */
-    .top-bar {
-      position: relative;
-      display: flex;
-      justify-content: space-between;
-      padding: 1rem 2rem;
-    }
+  /* editable */
+  .editable{padding:.25rem .5rem;border-radius:6px;border:1px dashed transparent;min-height:1.25rem}
+  .editable:focus{outline:none;border-color:rgba(99,102,241,.18);box-shadow:0 6px 20px rgba(99,102,241,.06)}
 
-    .toggle-theme {
-      cursor: pointer;
-      font-size: 1.5rem;
-      z-index: 10;
-    }
+  /* grid sections */
+  .grid{display:grid;grid-template-columns:1fr 320px;gap:1rem;margin-top:1rem}
+  @media (max-width:820px){.grid{grid-template-columns:1fr;}.avatar-row{justify-content:center}.meta{text-align:center}}
 
-    .live-clock {
-      z-index: 10;
-      font-weight: 600;
-      font-size: 1rem;
-    }
+  /* skills & progress */
+  .skill{margin-bottom:.85rem}
+  .skill label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:.35rem}
+  .progress-bar{height:10px;background:var(--border);border-radius:999px;overflow:hidden}
+  .progress-fill{height:100%;background:linear-gradient(90deg,var(--accent),#9f7aea);width:0%;transition:width 1.2s cubic-bezier(.2,.9,.2,1)}
 
-    /* ---- Avatar ---- */
-    .avatar-wrapper {
-      position: relative;
-      width: 150px;
-      height: 150px;
-      margin: -75px auto 0;
-      z-index: 2;
-    }
+  /* social */
+  .social-links{display:flex;gap:.6rem;flex-wrap:wrap;justify-content:center}
+  .social-links a{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:10px;border:1px solid var(--border);background:var(--bg2);text-decoration:none}
+  .social-links img{width:20px;height:20px;display:block}
 
-    .avatar {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      border: 5px solid var(--bg2);
-      object-fit: cover;
-      transition: transform .3s;
-      cursor: pointer;
-    }
+  /* qr & footer */
+  .qr-wrapper{text-align:center;margin-top:1rem}
+  canvas#qr-canvas{width:160px;height:160px;display:inline-block;border-radius:8px}
+  footer.footer{text-align:center;padding:1.25rem;color:var(--muted);font-size:.9rem;margin-top:1rem}
 
-    .avatar:hover { transform: scale(1.1); }
+  /* sound toggle */
+  .sound-toggle{position:fixed;right:1rem;bottom:1rem;background:var(--accent);color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:1.25rem;box-shadow:0 8px 24px rgba(99,102,241,.18);cursor:pointer;z-index:30}
 
-    /* ---- Card ---- */
-    .card {
-      max-width: 600px;
-      margin: 80px auto 2rem;
-      background: var(--bg2);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.1);
-      padding: 2rem;
-      position: relative;
-    }
+  /* achievements list */
+  .achievements p{margin-bottom:.4rem;cursor:default}
 
-    .username {
-      font-size: 2rem;
-      font-weight: 700;
-      text-align: center;
-      margin-bottom: .25rem;
-    }
-
-    .status {
-      text-align: center;
-      color: var(--muted);
-      margin-bottom: 2rem;
-    }
-
-    /* ---- Sections ---- */
-    .section h3 {
-      font-size: 1.25rem;
-      margin-bottom: 1rem;
-      color: var(--accent);
-    }
-
-    .editable {
-      padding: .25rem .5rem;
-      border: 1px dashed transparent;
-      border-radius: 4px;
-      transition: border-color .3s;
-    }
-
-    .editable:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-
-    /* ---- Progress bars ---- */
-    .skill {
-      margin-bottom: 1rem;
-    }
-
-    .skill label {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 600;
-      margin-bottom: .25rem;
-    }
-
-    .progress-bar {
-      height: 10px;
-      background: var(--border);
-      border-radius: 5px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-fill {
-      height: 100%;
-      background: var(--accent);
-      width: 0%;
-      transition: width 1.2s ease-out;
-    }
-
-    /* ---- Social ---- */
-    .social-links {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin-top: 1rem;
-    }
-
-    .social-links img {
-      width: 32px;
-      height: 32px;
-      transition: transform .2s;
-    }
-
-    .social-links a:hover img { transform: scale(1.2); }
-
-    /* ---- QR ---- */
-    .qr-wrapper {
-      text-align: center;
-      margin-top: 1.5rem;
-    }
-
-    #qr-canvas {
-      display: inline-block;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: .5rem;
-    }
-
-    /* ---- Footer ---- */
-    .footer {
-      text-align: center;
-      padding: 2rem 1rem;
-      color: var(--muted);
-      font-size: .875rem;
-    }
-
-    /* ---- Sound toggle ---- */
-    .sound-toggle {
-      position: fixed;
-      bottom: 1rem;
-      right: 1rem;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 50%;
-      width: 50px;
-      height: 50px;
-      font-size: 1.5rem;
-      cursor: pointer;
-      z-index: 20;
-    }
-
-    /* ---- Animations ---- */
-    @keyframes fade-in {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: none; }
-    }
-
-    .animate {
-      animation: fade-in .8s forwards;
-    }
-  </style>
+  /* small helpers */
+  .muted{color:var(--muted);font-size:.9rem}
+  .btn{background:transparent;border:1px solid var(--border);padding:.4rem .6rem;border-radius:8px;cursor:pointer}
+  .hidden{display:none}
+ </style>
 </head>
-<body>
+<body data-theme="auto">
 
-<canvas id="three-canvas"></canvas>
+ <canvas id="three-canvas"></canvas>
 
-<header class="top-bar">
-  <div class="live-clock" id="clock">--:--:--</div>
-  <div class="toggle-theme" id="themeToggle" title="Toggle dark mode">🌓</div>
-</header>
-
-<main class="card">
-  <div class="avatar-wrapper">
-    <img class="avatar" id="avatar" src="https://i.pravatar.cc/300?u=thomas" alt="Ashien">
-    <input type="file" id="avatarUpload" accept="image/*" hidden>
+ <header class="top-bar">
+  <div class="top-left">
+   <div class="brand">Ashien Profile</div>
+   <div class="live-clock" id="clock">--:--:--</div>
   </div>
+  <div class="controls">
+   <button class="btn" id="downloadVCard" title="Download vCard">Export vCard</button>
+   <button class="btn" id="themeToggle" title="Toggle theme">Theme</button>
+  </div>
+ </header>
 
-  <h1 class="username editable" contenteditable="true">Ashien Frazier</h1>
-  <p class="status editable" contenteditable="true">Gak tau siapa anjir, tapi keren sih</p>
-
-  <!-- Info -->
-  <section class="section">
-    <h3>Info</h3>
-    <p class="editable" contenteditable="true">📍 Jakarta, Indonesia</p>
-    <p class="editable" contenteditable="true">📞 62882... (sisanya pake feeling)</p>
-    <p class="editable" contenteditable="true">✉️ fadilla@exdonuts.com</p>
-    <p class="editable" contenteditable="true">💬 Dimas profesional, anjay mabar certified™</p>
-    <p class="editable" contenteditable="true">🗓 25 September 2018</p>
-  </section>
-
-  <!-- Skills -->
-  <section class="section">
-    <h3>Skill Supernatural</h3>
-    <div class="skill">
-      <label><span>🛏️ Tidur Level Dewa</span> <span>98%</span></label>
-      <div class="progress-bar"><div class="progress-fill" data-val="98"></div></div>
+ <main class="container">
+  <article class="card animate" role="region" aria-label="Profile card">
+   <div class="avatar-row">
+    <div class="avatar-wrapper" id="avatarWrapper" title="Klik untuk ganti avatar" tabindex="0">
+     <img id="avatar" class="avatar" alt="Avatar" src="https://i.pravatar.cc/300?u=thomas" loading="lazy" />
     </div>
-    <div class="skill">
-      <label><span>🍟 Jajan Random</span> <span>92%</span></label>
-      <div class="progress-bar"><div class="progress-fill" data-val="92"></div></div>
+    <div class="meta">
+     <h1 class="username editable" id="name" contenteditable="true" aria-label="Nama">Ashien Frazier</h1>
+     <p class="status editable" id="status" contenteditable="true" aria-label="Status">Gak tau siapa anjir, tapi keren sih</p>
+     <div class="muted">Lokasi: <span class="editable" id="location" contenteditable="true">Jakarta, Indonesia</span></div>
+     <div class="muted" style="margin-top:.45rem">Email: <span class="editable" id="email" contenteditable="true">fadilla@exdonuts.com</span></div>
     </div>
-    <div class="skill">
-      <label><span>🍗 Makan Tanpa Henti</span> <span>88%</span></label>
-      <div class="progress-bar"><div class="progress-fill" data-val="88"></div></div>
-    </div>
-    <div class="skill">
-      <label><span>🧘‍♂️ Nggak Ngapa-ngapain</span> <span>100%</span></label>
-      <div class="progress-bar"><div class="progress-fill" data-val="100"></div></div>
-    </div>
-  </section>
+   </div>
 
-  <!-- Achievements -->
-  <section class="section">
-    <h3>Pencapaian</h3>
-    <p>🏆 Juara 1 Rebahan Marathon 2023</p>
-    <p>📜 Sertifikat Profesional Tiduran di Gawean</p>
-    <p>⭐ Dinobatkan sebagai "Si Paling Gak Peduli"</p>
-  </section>
+   <div class="grid">
+    <section aria-labelledby="skillsTitle">
+     <h3 id="skillsTitle" style="color:var(--accent);margin-top:1rem">Skill Supernatural</h3>
+     <div id="skillsList">
+      <div class="skill">
+       <label><span>🛏️ Tidur Level Dewa</span> <span>98%</span></label>
+       <div class="progress-bar"><div class="progress-fill" data-val="98"></div></div>
+      </div>
+      <div class="skill">
+       <label><span>🍟 Jajan Random</span> <span>92%</span></label>
+       <div class="progress-bar"><div class="progress-fill" data-val="92"></div></div>
+      </div>
+      <div class="skill">
+       <label><span>🍗 Makan Tanpa Henti</span> <span>88%</span></label>
+       <div class="progress-bar"><div class="progress-fill" data-val="88"></div></div>
+      </div>
+      <div class="skill">
+       <label><span>🧘‍♂️ Nggak Ngapa-ngapain</span> <span>100%</span></label>
+       <div class="progress-bar"><div class="progress-fill" data-val="100"></div></div>
+      </div>
+     </div>
 
-  <!-- Social -->
-  <section class="section">
-    <h3>Social Media (buat stalk boleh 👀)</h3>
-    <div class="social-links">
-      <a href="https://www.instagram.com/ayam_special1" target="_blank"><img src="./images/instagram.webp" alt="IG"></a>
-      <a href="https://github.com/BIANTCA" target="_blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub"></a>
-      <a href="https://x.com/AshienFrazier" target="_blank"><img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" alt="Twitter"></a>
-    </div>
-  </section>
+     <h3 style="color:var(--accent);margin-top:1rem">Pencapaian</h3>
+     <div class="achievements">
+      <p class="editable" contenteditable="true">🏆 Juara 1 Rebahan Marathon 2023</p>
+      <p class="editable" contenteditable="true">📜 Sertifikat Profesional Tiduran di Gawean</p>
+      <p class="editable" contenteditable="true">⭐ Dinobatkan sebagai "Si Paling Gak Peduli"</p>
+     </div>
+    </section>
 
-  <!-- QR vCard -->
-  <section class="qr-wrapper">
-    <h3>QR vCard</h3>
-    <canvas id="qr-canvas"></canvas>
-  </section>
-</main>
+    <aside>
+     <h3 style="color:var(--accent);margin-top:1rem">Social Media (buat stalk boleh 👀)</h3>
+     <div class="social-links" id="socialLinks">
+      <a href="https://www.instagram.com/ayam_special1" target="_blank" rel="noopener noreferrer"><img alt="IG" loading="lazy" src="./images/instagram.webp" /></a>
+      <a href="https://github.com/BIANTCA" target="_blank" rel="noopener noreferrer"><img alt="GitHub" loading="lazy" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" /></a>
+      <a href="https://x.com/AshienFrazier" target="_blank" rel="noopener noreferrer"><img alt="X" loading="lazy" src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/twitter/twitter-original.svg" /></a>
+     </div>
 
-<footer class="footer">
-  🔔 Notifikasi: <strong>Selalu nyala, tapi dibaca nanti-nanti</strong><br>
-  © <span id="year">2025</span> Ashien Frazier
-</footer>
+     <div class="qr-wrapper" style="margin-top:1rem">
+      <h3 style="color:var(--accent)">QR vCard</h3>
+      <canvas id="qr-canvas" aria-hidden="true"></canvas>
+      <div style="margin-top:.6rem">
+       <button class="btn" id="copyVCard">Copy vCard text</button>
+      </div>
+     </div>
+    </aside>
+   </div>
+  </article>
 
-<button class="sound-toggle" title="Toggle sounds" id="soundToggle">🔊</button>
+  <footer class="footer">
+   🔔 Notifikasi: <strong>Selalu nyala, tapi dibaca nanti-nanti</strong><br />
+   © <span id="year">2025</span> Ashien Frazier
+  </footer>
+ </main>
 
-<script>
-/* ============ CONFIG ============ */
-const SOUNDS_ENABLED = !!localStorage.getItem('sounds');
-const TYPE_SND = new Audio('data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAEAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUarm7blmFgU7k9n1unEiBC13yO/eizEIHWq+8+OWT');
-const POP_SND = new Audio('data:audio/wav;base64,UklGRiQDAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YQADAAAAAAEA');
+ <input type="file" id="avatarUpload" accept="image/*" class="hidden" />
 
-/* ============ THEME ============ */
-const themeToggle = document.getElementById('themeToggle');
-function applyTheme(dark) {
-  document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
-  themeToggle.textContent = dark ? '🌞' : '🌙';
-}
-themeToggle.addEventListener('click', () => {
-  const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
-  applyTheme(dark);
-  localStorage.setItem('dark', dark);
-});
-applyTheme(localStorage.getItem('dark') === 'true');
+ <button class="sound-toggle" id="soundToggle" title="Toggle sounds">🔊</button>
 
-/* ============ CLOCK ============ */
-const clock = document.getElementById('clock');
-function updateClock() {
-  const now = new Date();
-  clock.textContent = now.toLocaleTimeString();
-}
-setInterval(updateClock, 1000);
-updateClock();
+ <script>
+  /* =========================
+   Config & util
+  ========================= */
+  const LS_PREFIX = 'ashien_v2_';
+  const qs = sel => document.querySelector(sel);
+  const qsa = sel => Array.from(document.querySelectorAll(sel));
+  const debounce = (fn,wait=400)=>{let t;return (...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),wait)}};
 
-/* ============ SOUNDS ============ */
-const soundBtn = document.getElementById('soundToggle');
-function toggleSounds() {
-  const on = !SOUNDS_ENABLED;
-  localStorage.setItem('sounds', on ? '1' : '');
-  soundBtn.textContent = on ? '🔊' : '🔇';
-}
-soundBtn.textContent = SOUNDS_ENABLED ? '🔊' : '🔇';
-soundBtn.addEventListener('click', toggleSounds);
-
-document.addEventListener('keydown', e => {
-  if (SOUNDS_ENABLED && e.target.isContentEditable) TYPE_SND.cloneNode().play();
-});
-document.addEventListener('keyup', e => {
-  if (SOUNDS_ENABLED && e.key === 'Backspace' && e.target.isContentEditable) POP_SND.cloneNode().play();
-});
-
-/* ============ PROGRESS BARS ============ */
-function animateProgress() {
-  document.querySelectorAll('.progress-fill').forEach(el => {
-    const val = el.dataset.val;
-    setTimeout(() => el.style.width = val + '%', 300);
+  /* =========================
+   Theme
+  ========================= */
+  const themeToggleBtn = qs('#themeToggle');
+  const applyTheme = (mode)=>{
+   document.documentElement.setAttribute('data-theme', mode);
+   localStorage.setItem(LS_PREFIX+'theme', mode);
+   themeToggleBtn.textContent = mode==='dark'?'🌞':mode==='light'?'🌙':'🌓';
+  };
+  const savedTheme = localStorage.getItem(LS_PREFIX+'theme') || 'auto';
+  if(savedTheme==='auto'){
+   const prefers = window.matchMedia && window.matchMedia('(prefers-color-scheme:dark)').matches;
+   applyTheme(prefers?'dark':'light');
+  } else { applyTheme(savedTheme); }
+  themeToggleBtn.addEventListener('click',()=>{
+   const cur = document.documentElement.getAttribute('data-theme');
+   const next = cur==='dark'?'light':'dark';
+   applyTheme(next);
   });
-}
-const io = new IntersectionObserver(entries => {
-  entries.forEach(e => e.isIntersecting && animateProgress());
-});
-io.observe(document.querySelector('.skills'));
 
-/* ============ AVATAR SWAP ============ */
-const avatar = document.getElementById('avatar');
-const fileInp = document.getElementById('avatarUpload');
-avatar.addEventListener('click', () => fileInp.click());
-fileInp.addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (file) {
-    const url = URL.createObjectURL(file);
-    avatar.src = url;
-    localStorage.setItem('avatar', url);
+  /* =========================
+   Clock
+  ========================= */
+  const clockEl = qs('#clock');
+  function updateClock(){ const now=new Date(); clockEl.textContent = now.toLocaleTimeString(); }
+  setInterval(updateClock,1000);
+  updateClock();
+
+  /* =========================
+   Autosave editable fields -> localStorage
+  ========================= */
+  const editableIds = ['name','status','location','email'];
+  editableIds.forEach(id=>{
+   const el = qs('#'+id);
+   const key = LS_PREFIX+id;
+   if(localStorage.getItem(key)) el.textContent = localStorage.getItem(key);
+   const save = debounce(()=> localStorage.setItem(key, el.textContent), 450);
+   el.addEventListener('input', save);
+   el.addEventListener('blur', save);
+  });
+  qsa('.achievements .editable').forEach((p,i)=>{
+   const key = LS_PREFIX+'achv_'+i;
+   if(localStorage.getItem(key)) p.textContent = localStorage.getItem(key);
+   const save = debounce(()=> localStorage.setItem(key,p.textContent), 450);
+   p.addEventListener('input',save);
+  });
+
+  /* =========================
+   Skills animation
+  ========================= */
+  function animateProgress(){
+   qsa('.progress-fill').forEach(el=>{
+    const val = el.dataset.val || 0;
+    el.style.width = val + '%';
+   });
   }
-});
-if (localStorage.getItem('avatar')) avatar.src = localStorage.getItem('avatar');
+  const io = new IntersectionObserver(entries=>{
+   entries.forEach(e=>{
+    if(e.isIntersecting){ animateProgress(); io.disconnect(); }
+   });
+  },{threshold:.2});
+  const card = qs('.card');
+  if(card) io.observe(card);
 
-/* ============ CONFETTI ON ACHIEVEMENT HOVER ============ */
-document.querySelectorAll('.section p').forEach(p => {
-  p.addEventListener('mouseenter', () => {
-    if (SOUNDS_ENABLED && typeof confetti === 'function') {
-      confetti({ particleCount: 60, spread: 70, origin: { y: .8 } });
+  /* =========================
+   Avatar upload & persistence
+  ========================= */
+  const avatar = qs('#avatar');
+  const avatarInput = qs('#avatarUpload');
+  const avatarWrapper = qs('#avatarWrapper');
+  const AV_KEY = LS_PREFIX+'avatar';
+  avatarWrapper.addEventListener('click',()=> avatarInput.click());
+  avatarInput.addEventListener('change', async (ev)=>{
+   const file = ev.target.files && ev.target.files[0];
+   if(!file) return;
+   const dataUrl = await readFileAsDataURL(file);
+   const reduced = await maybeResizeDataUrl(dataUrl, 1200*1024);
+   avatar.src = reduced;
+   localStorage.setItem(AV_KEY,reduced);
+  });
+  if(localStorage.getItem(AV_KEY)) avatar.src = localStorage.getItem(AV_KEY);
+  function readFileAsDataURL(file){ return new Promise((res,rej)=>{ const fr = new FileReader(); fr.onload = ()=>res(fr.result); fr.onerror = rej; fr.readAsDataURL(file); });}
+  function maybeResizeDataUrl(dataUrl,maxBytes=1200000){
+   return new Promise(resolve=>{
+    const approx = Math.round((dataUrl.length*3)/4);
+    if(approx <= maxBytes) return resolve(dataUrl);
+    const img = new Image(); img.onload = ()=>{
+     const scale = Math.sqrt(maxBytes/approx);
+     const w = Math.max(128, Math.round(img.width * scale));
+     const h = Math.max(128, Math.round(img.height * scale));
+     const c = document.createElement('canvas'); c.width = w; c.height = h;
+     const ctx = c.getContext('2d'); ctx.drawImage(img,0,0,w,h);
+     resolve(c.toDataURL('image/jpeg',0.75));
+    };
+    img.src = dataUrl;
+   });
+  }
+
+  /* =========================
+   Confetti on achievement hover
+  ========================= */
+  qsa('.achievements p').forEach(p=>{
+   p.addEventListener('mouseenter',()=>{
+    if(typeof confetti==='function'){
+     confetti({ particleCount:50, spread:70, origin:{y:.7}, colors:['#6366f1','#f97316','#f43f5e','#10b981','#f59e0b'] });
     }
+   });
   });
-});
 
-/* ============ QR CODE ============ */
-const vcard = `BEGIN:VCARD
-VERSION:3.0
-FN:Ashien Frazier
-EMAIL:fadilla@exdonuts.com
-TEL:62882
-ADR:;;Jakarta;Indonesia;;;
-URL:https://github.com/BIANTCA
-NOTE:Dimas profesional, anjay mabar certified™
-END:VCARD`;
-QRCode.toCanvas(document.getElementById('qr-canvas'), vcard.trim(), { width: 160 });
+  /* =========================
+   QR Code (vCard) - FIXED
+   - buildVCard uses real newlines '\n'
+   - renderQR waits/polls for QRCode lib if not yet available
+  ========================= */
+  const nameEl = qs('#name');
+  const emailEl = qs('#email');
+  const locationEl = qs('#location');
+  const qrCanvas = qs('#qr-canvas');
 
-/* ============ 3D PARTICLE HEADER ============ */
-let scene, camera, renderer, particles;
-function initThree() {
-  if (!window.THREE) return;
-  scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(75, innerWidth / 300, .1, 1000);
-  camera.position.z = 5;
-
-  renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three-canvas'), alpha: true });
-  renderer.setSize(innerWidth, 300);
-
-  const geo = new THREE.BufferGeometry();
-  const count = 2000;
-  const pos = new Float32Array(count * 3);
-  for (let i = 0; i < count * 3; i++) pos[i] = (Math.random() - .5) * 10;
-  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-
-  const mat = new THREE.PointsMaterial({ color: 0x6366f1, size: .02 });
-  particles = new THREE.Points(geo, mat);
-  scene.add(particles);
-
-  animate();
-}
-function animate() {
-  requestAnimationFrame(animate);
-  particles.rotation.x += .0005;
-  particles.rotation.y += .0007;
-  renderer.render(scene, camera);
-}
-window.addEventListener('resize', () => {
-  if (renderer) {
-    camera.aspect = innerWidth / 300;
-    camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, 300);
+  function buildVCard(){
+   return [
+    'BEGIN:VCARD',
+    'VERSION:3.0',
+    `FN:${(nameEl.textContent||'').trim()}`,
+    `EMAIL:${(emailEl.textContent||'').trim()}`,
+    `TEL:62882`,
+    `ADR:;;${(locationEl.textContent||'').trim()};;;`,
+    `URL:https://github.com/BIANTCA`,
+    `NOTE:Dimas profesional, anjay mabar certified™`,
+    'END:VCARD'
+   ].join('\n');
   }
-});
-window.addEventListener('load', initThree);
 
-/* ============ PWA SERVICE WORKER ============ */
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('data:text/javascript,console.log("sw")');
-}
+  async function waitForQRCode(timeout = 3000){
+   const start = Date.now();
+   while(typeof QRCode === 'undefined'){
+    if(Date.now() - start > timeout) return false;
+    await new Promise(r=>setTimeout(r, 50));
+   }
+   return true;
+  }
 
-/* ============ YEAR ============ */
-document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+  async function renderQR(){
+   const ok = await waitForQRCode(2500);
+   if(!ok){
+    // fallback: draw simple text into canvas so user sees something
+    try{
+     const ctx = qrCanvas.getContext('2d');
+     ctx.clearRect(0,0,qrCanvas.width,qrCanvas.height);
+     ctx.font = '12px sans-serif';
+     ctx.fillStyle = '#888';
+     ctx.fillText('QR lib missing', 10, 20);
+    }catch(e){/* ignore */}
+    console.warn('QRCode library not ready: QR will render when library loads.');
+    return;
+   }
+   try{
+    // ensure canvas has proper pixel size
+    const size = 160;
+    qrCanvas.width = size * (window.devicePixelRatio || 1);
+    qrCanvas.height = size * (window.devicePixelRatio || 1);
+    qrCanvas.style.width = size + 'px';
+    qrCanvas.style.height = size + 'px';
+    // use QRCode.toCanvas - pass canvas element
+    await QRCode.toCanvas(qrCanvas, buildVCard(), { width: size, margin: 1 });
+   }catch(err){
+    console.error('Failed to render QR', err);
+   }
+  }
+
+  // initial render (renders once QR lib is available)
+  renderQR();
+
+  // re-render when editable fields change (debounced)
+  qsa('.editable').forEach(el=> el.addEventListener('input', debounce(renderQR, 300)));
+
+  qs('#copyVCard').addEventListener('click', async ()=>{
+   try{ await navigator.clipboard.writeText(buildVCard()); alert('vCard text copied'); }catch(e){ alert('Gagal copy vCard'); }
+  });
+
+  qs('#downloadVCard').addEventListener('click', ()=>{
+   const blob = new Blob([buildVCard()],{type:'text/vcard'});
+   const url = URL.createObjectURL(blob);
+   const a = document.createElement('a'); a.href = url; a.download = (nameEl.textContent.trim()||'contact') + '.vcf';
+   document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  });
+
+  /* =========================
+   Sound toggle
+  ========================= */
+  const soundBtn = qs('#soundToggle');
+  const TYPE_SND = new Audio('data:audio/wav;base64,UklGRiQEAABXQVZFZm10IBAAAAABAAEAESsAABErAAABAAgAZGF0YQAEAACBhYqF');
+  const POP_SND = new Audio('data:audio/wav;base64,UklGRiQDAABXQVZFZm10IBAAAAABAAEARKwAAESsAAABAAgAZGF0YQADAAAAAAEA');
+  let soundsOn = !!localStorage.getItem(LS_PREFIX+'sounds');
+  soundBtn.textContent = soundsOn ? '🔊':'🔇';
+  soundBtn.addEventListener('click',()=>{ soundsOn = !soundsOn; localStorage.setItem(LS_PREFIX+'sounds', soundsOn? '1':''); soundBtn.textContent = soundsOn?'🔊':'🔇'; });
+  document.addEventListener('keydown', e=>{ if(soundsOn && e.target.isContentEditable) TYPE_SND.cloneNode().play(); });
+  document.addEventListener('keyup', e=>{ if(soundsOn && e.key==='Backspace' && e.target.isContentEditable) POP_SND.cloneNode().play(); });
+
+  /* =========================
+   Three.js header particles (basic)
+  ========================= */
+  let scene, camera, renderer, points, mouse = {x:0,y:0};
+  function initThree(){
+   if(!window.THREE) return;
+   const canvas = qs('#three-canvas');
+   scene = new THREE.Scene();
+   const ratio = window.innerWidth / (window.innerHeight*0.42 || 300);
+   camera = new THREE.PerspectiveCamera(55, ratio, 0.1, 1000);
+   camera.position.z = 6;
+   renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha:true, antialias:true });
+   renderer.setPixelRatio(window.devicePixelRatio || 1);
+   renderer.setSize(window.innerWidth, canvas.clientHeight);
+
+   const count = Math.min(6000, Math.floor(window.innerWidth * 2));
+   const pos = new Float32Array(count*3);
+   for(let i=0;i<count*3;i++) pos[i] = (Math.random() - .5) * 12;
+   const geo = new THREE.BufferGeometry();
+   geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+   const mat = new THREE.PointsMaterial({ size: .03, vertexColors: false, color:0x8b5cf6, transparent:true, opacity:0.9});
+   points = new THREE.Points(geo,mat);
+   scene.add(points);
+
+   (function animate(){
+    requestAnimationFrame(animate);
+    if(!points) return;
+    points.rotation.x += 0.0008;
+    points.rotation.y += 0.0012;
+    if(camera){
+     camera.position.x += (mouse.x*1.2 - camera.position.x) * 0.02;
+     camera.position.y += (mouse.y*0.6 - camera.position.y) * 0.02;
+     camera.lookAt(0,0,0);
+    }
+    renderer.render(scene,camera);
+   })();
+
+   window.addEventListener('resize', ()=>{ if(!renderer) return; renderer.setSize(window.innerWidth, canvas.clientHeight); camera.aspect = window.innerWidth / canvas.clientHeight; camera.updateProjectionMatrix(); });
+   document.addEventListener('mousemove', e=>{ mouse.x = (e.clientX / window.innerWidth) * 2 - 1; mouse.y = -(e.clientY / window.innerHeight) * 2 + 1; });
+  }
+  window.addEventListener('load', initThree);
+
+  /* =========================
+   Service worker (simple inline)
+  ========================= */
+  if('serviceWorker' in navigator){
+   const swCode = `
+    const CACHE = 'ashien-v2-cache';
+    self.addEventListener('install', e=>{
+     self.skipWaiting();
+     e.waitUntil(
+      caches.open(CACHE).then(c=>c.addAll(['/']))
+     );
+    });
+    self.addEventListener('fetch', e=>{
+     e.respondWith(caches.match(e.request).then(r=>r || fetch(e.request).catch(()=>new Response('offline'))));
+    });
+   `;
+   const blob = new Blob([swCode], {type:'text/javascript'});
+   navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{/* silent fail */});
+  }
+
+  /* =========================
+   Year auto
+  ========================= */
+  qs('#year').textContent = new Date().getFullYear();
+
+  /* Accessibility: Enter on avatar opens picker */
+  avatarWrapper.addEventListener('keydown', e=>{ if(e.key==='Enter' || e.key===' ') avatarInput.click(); });
+ </script>
 </body>
 </html>
